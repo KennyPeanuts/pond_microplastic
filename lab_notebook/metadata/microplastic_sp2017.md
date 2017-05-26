@@ -1,9 +1,11 @@
 # Metadata for the pond microplastic sampling from LPP and DP 
 
-## File
+## Files
 
-    pond_microplastic_sp2017.csv
-    
+* pond_microplastic_sp2017.csv
+  
+* pond_microplastic_means_sp2017.csv
+
 ## Description
 
 * Collected by: KF 
@@ -23,8 +25,49 @@ Details about the sampling and sample processing can be found in the [pond_micro
 
 ## Variable Descriptions
 
+* sample = the unique identifier for each sample
+
+* pond = the id for each pond. LPP = Lancer Park Pond, DP = Daulton Pond, Blank = the blank that was processed in the lab
+
+* mesh = the size of the mesh in the plankton net (um)
+
+* tow_dist = the distance the plankton net was towed (m)
+
+* tow_number = the number of tows per sample
+
+* vol_sampled = the volume of water that was sampled in each sample (m^3)
+
+* count_rep = the replicate 2 ml subsample taken from the 20 ml dilution for counting.
+
+* fiber = the number of plastic fibers in the 2 ml subsample
+
+* blue.red = the number of blue and red plastic fibers per 2 ml subsample 
+
+* other = the number of microplastic fragments that are not fibers per 2 ml subsample 
+
+* total = the total number of microplastic fragments per 2 ml subsample 
+
+* fiber_m3 = the number of plastic fibers per cubic meter
+
+* blue.red_m3 = the number of blue and red plastic fibers per cubic meter. These are separated out because they may be contamination from the lab
+
+* other_m3 = the number of microplastic fragments that are not fibers per cubic meter
+
+* total_m3 = the total number of microplastic fragments per cubic meter
+
+* fiber_L = the number of plastic fibers per L
+
+* blue.red_L = the number of blue and red plastic fibers per L. These are separated out because they may be contamination from the lab
+
+* other_L = the number of microplastic fragments that are not fibers per L
+
+* total_L = the total number of microplastic fragments per L 
+
+**NOTE: In the pond_microplastic_means_sp2017.csv file, these represent the mean value across the subsamples**
+
 ## Data Entry
 ### Count Data
+    sample <- c(rep("LPP-A", 3), rep("LPP-B", 3), rep("LPP-C", 3), rep("DP-A", 3), rep("DP- B", 3), rep("Blank-A", 3))
     pond <- c(rep("LPP", 9), rep("DP", 6), rep("Blank", 3))
     rep <- c(rep("A", 3), rep("B", 3), rep("C", 3), rep("A", 3), rep("B", 3), rep("A", 3))
     count_rep <- rep(c("i", "ii", "iii"), 6)    
@@ -66,8 +109,43 @@ These values represent the estimate of the total number of plastic particles col
     
 ## Create Data Frame
     
-    plastic <- data.frame(pond, rep, mesh, tow_dist, tow_number, vol_sampled, count_rep, fiber_m3, blue.red_m3, other_m3, total_m3, fiber_L, blue.red_L, other_L, total_L)
+    plastic <- data.frame(sample, pond, rep, mesh, tow_dist, tow_number, vol_sampled, count_rep, fiber, blue.red, other, total, fiber_m3, blue.red_m3, other_m3, total_m3, fiber_L, blue.red_L, other_L, total_L)
 
-## Write Table
+## Write Table for Raw Data
     
     write.table(plastic, "./data/pond_microplastic_sp2017.csv", row.names = F, quote = F, sep = ",")
+
+## Create Data Frame of Means
+### Define Function to average across subsamples for each sample
+    
+    sub.sample.means <- function(x) {
+     conc.means <- numeric(6) # creates empty object for values
+     
+     for (i in as.numeric(plastic$sample))
+      conc.means[i] <- mean(x[as.numeric(plastic$sample) == i], na.rm = T)
+      # "x" is the value that needs to be averaged (e.g., plastic$total_L)
+     
+     return(conc.means)
+    }
+
+### Create Data Frame of Means across subsamples
+
+**NOTE THIS REUSES VARIABLE NAMES**
+    
+    pond <- c("Blank", rep("DP", 2), rep("LPP", 3))
+    rep <- c("A", "A", "B", "A", "B", "C")
+    fiber_m3.means <- sub.sample.means(plastic$fiber_m3)
+    blue.red_m3.means <- sub.sample.means(plastic$blue.red_m3)
+    other_m3.means <- sub.sample.means(plastic$other_m3)
+    total_m3.means <- sub.sample.means(plastic$total_m3)
+    fiber_L.means <- sub.sample.means(plastic$fiber_L)
+    blue.red_L.means <- sub.sample.means(plastic$blue.red_L)
+    other_L.means <- sub.sample.means(plastic$other_L)
+    total_L.means <- sub.sample.means(plastic$total_L)
+    
+    plastic.means <- data.frame(pond, rep, fiber_m3.means, blue.red_m3.means, other_m3.means, total_m3.means, fiber_L.means, blue.red_L.means, other_L.means, total_L.means)
+    names(plastic.means) <- c("pond", "rep", "fiber_m3", "blue.red_m3", "other_m3", "total_m3", "fiber_L", "blue.red_L", "other_L", "total_L")
+
+## Write Table for Data Averaged Across Subsamples
+    
+    write.table(plastic.means, "./data/pond_microplastic_means_sp2017.csv", row.names = F, quote = F, sep = ",")
