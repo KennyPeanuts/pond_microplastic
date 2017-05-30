@@ -104,10 +104,11 @@ sample estimates:
 ## Data Visualization
     
     par(las = 1, oma = c(1, 1, 1, 1))
-    plot(total_L ~ as.numeric(ponds), data = plastic, ylim = c(0, 1.5), xlim = c(0.5, 2.5), ylab = "Total Microplastic Fragments per L", xlab = " ",  pch = 19, axes = F, cex = 1.5)
+    plot(total_L ~ as.numeric(ponds), data = plastic, ylim = c(0, 1.5), xlim = c(0.5, 2.5), ylab = "Total Microplastic Fragments per L", xlab = " ",  pch = 19, col = c("darkolivegreen3", "darkorange3", "darkorange3", "darkolivegreen3", "darkolivegreen3"), axes = F, cex = 1.5)
     axis(2)
     axis(1, c("Daulton Pond", "Lancer Park Pond"), at = c(1, 2))
     box()
+    points(total_L ~ as.numeric(ponds), data = plastic, cex = 1.5)
     dev.copy(jpeg, "./output/plots/total_L_by_pond.jpg")
     dev.off()
     
